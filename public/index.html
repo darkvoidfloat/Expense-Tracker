@@ -39,37 +39,6 @@
         }
         /* Hide scrollbar for container */
         .container::-webkit-scrollbar { width: 0; }
-        /* --- EASTER EGG (GOD MODE) STYLES --- */
-.god-mode-body {
-    background: #000 !important;
-}
-
-/* Matrix Green Shake Effect */
-.god-mode-container {
-    border: 2px solid #0f0 !important;
-    box-shadow: 0 0 50px #0f0 !important;
-    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-/* Force everything inside to be Green */
-.god-mode-container *, 
-.god-mode-container input, 
-.god-mode-container button {
-    color: #0f0 !important;
-    text-shadow: 0 0 5px #0f0 !important;
-    border-color: #0f0 !important;
-    font-family: 'Courier New', monospace !important; /* Hacker Font */
-}
-
-.god-mode-container input { background: #000 !important; }
-.god-mode-container button { background: #001100 !important; }
-
-@keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0) rotate(1deg); }
-    20%, 80% { transform: translate3d(2px, 0, 0) rotate(-1deg); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0) rotate(2deg); }
-    40%, 60% { transform: translate3d(4px, 0, 0) rotate(-2deg); }
-}
 
         .app-logo {
             font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 25px;
@@ -463,4 +432,3 @@
     </script>
 </body>
 </html>
-
