@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Glass Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS STYLES - SAME AS BEFORE */
+        :root {
+            --bg-color: #0f0c29;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --accent-primary: #00f2ff;
+            --accent-secondary: #ff0055;
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: move 10s infinite alternate;
+        }
+
+        .blob-1 {
+            top: 10%;
+            left: 10%;
+            width: 300px;
+            height: 300px;
+            background: var(--accent-secondary);
+        }
+
+        .blob-2 {
+            bottom: 10%;
+            right: 10%;
+            width: 350px;
+            height: 350px;
+            background: #302b63;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 40%;
+            width: 200px;
+            height: 200px;
+            background: var(--accent-primary);
+            animation-duration: 15s;
+        }
+
+        @keyframes move {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+
+            to {
+                transform: translate(20px, -20px) scale(1.1);
+            }
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: 0.3s ease;
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            margin-bottom: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--accent-primary), #00a8cc);
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4);
+        }
+
+        button.secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: white;
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .balance-box {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            background: -webkit-linear-gradient(45deg, var(--accent-primary), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .list::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 5px;
+        }
+
+        .transaction {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .transaction-info h4 {
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .transaction-info p {
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .delete-btn {
+            width: auto;
+            background: transparent;
+            color: #ff4d4d;
+            padding: 5px;
+            margin: 0;
+            opacity: 0.7;
+        }
+
+        .delete-btn:hover {
+            transform: none;
+            box-shadow: none;
+            opacity: 1;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            color: white;
+            width: auto;
+            padding: 5px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="container">
+        <div id="auth-view" class="view active">
+            <h2 id="auth-title">Login</h2>
+            <form id="auth-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" id="submit-btn">Login</button>
+            </form>
+            <button class="secondary" id="toggle-auth">Need to Sign Up?</button>
+        </div>
+        <div id="app-view" class="view">
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+            <header>
+                <h2>Balance</h2>
+                <div id="balance" class="balance-box">$0.00</div>
+            </header>
+            <form id="transaction-form">
+                <input type="text" id="text" placeholder="Expense Name" required autocomplete="off">
+                <input type="number" id="amount" placeholder="Amount (-20 or 100)" required step="0.01">
+                <button class="add-btn">Add Transaction</button>
+            </form>
+            <ul id="list" class="list"></ul>
+        </div>
+    </div>
+    <script>
+        // NOTE: Relative path for Vercel deployment
+        const API_URL = '/api';
+
+        let isLoginMode = true;
+        const authView = document.getElementById('auth-view'), appView = document.getElementById('app-view'), authTitle = document.getElementById('auth-title'), authForm = document.getElementById('auth-form'), toggleBtn = document.getElementById('toggle-auth'), submitBtn = document.getElementById('submit-btn');
+        const listEl = document.getElementById('list'), balanceEl = document.getElementById('balance'), transactionForm = document.getElementById('transaction-form');
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (token) { authView.classList.remove('active'); appView.classList.add('active'); loadTransactions(); }
+            else { authView.classList.add('active'); appView.classList.remove('active'); }
+        }
+
+        toggleBtn.addEventListener('click', () => { isLoginMode = !isLoginMode; authTitle.innerText = isLoginMode ? 'Login' : 'Sign Up'; submitBtn.innerText = isLoginMode ? 'Login' : 'Sign Up'; toggleBtn.innerText = isLoginMode ? 'Need to Sign Up?' : 'Have an account?'; });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const endpoint = isLoginMode ? '/login' : '/register';
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (res.ok) { localStorage.setItem('token', data.token); checkAuth(); } else { alert(data.msg || 'Error occurred'); }
+            } catch (err) { console.error(err); }
+        });
+
+        function logout() { localStorage.removeItem('token'); checkAuth(); listEl.innerHTML = ''; }
+
+        async function loadTransactions() {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/expenses`, { headers: { 'x-auth-token': token } });
+            const data = await res.json();
+            listEl.innerHTML = ''; data.forEach(addTransactionDOM); updateValues(data);
+        }
+
+        transactionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('text').value;
+            const amount = document.getElementById('amount').value;
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/expenses`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }, body: JSON.stringify({ text, amount }) });
+            const data = await res.json();
+            addTransactionDOM(data); loadTransactions();
+            document.getElementById('text').value = ''; document.getElementById('amount').value = '';
+        });
+
+        function addTransactionDOM(transaction) {
+            const sign = transaction.amount < 0 ? '-' : '+';
+            const borderColors = transaction.amount < 0 ? '#ff0055' : '#00f2ff';
+            const item = document.createElement('li');
+            item.classList.add('transaction'); item.style.borderLeft = `4px solid ${borderColors}`;
+            item.innerHTML = `<div class="transaction-info"><h4>${transaction.text}</h4><p>${transaction.date}</p></div><div style="display:flex; align-items:center;"><span style="font-weight:700; color:${borderColors}">${sign}$${Math.abs(transaction.amount).toFixed(2)}</span><button class="delete-btn" onclick="removeTransaction('${transaction._id}')"><i class="fas fa-trash"></i></button></div>`;
+            listEl.appendChild(item);
+        }
+
+        async function removeTransaction(id) {
+            const token = localStorage.getItem('token');
+            await fetch(`${API_URL}/expenses/${id}`, { method: 'DELETE', headers: { 'x-auth-token': token } });
+            loadTransactions();
+        }
+
+        function updateValues(transactions) {
+            const amounts = transactions.map(t => t.amount);
+            const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2);
+            balanceEl.innerText = `$${total}`;
+        }
+        checkAuth();
+    </script>
+</body>
+
+</html>
