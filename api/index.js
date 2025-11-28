@@ -26,6 +26,23 @@ const connectToDatabase = async () => {
     });
     isConnected = true;
 };
+// --- VIEW COUNTER LOGIC ---
+function updateViewCount() {
+    const countEl = document.getElementById('view-count');
+    // Using a free public counter API with a unique namespace 'sujay-expense-tracker'
+    // It increments automatically on every fetch
+    fetch('https://api.counterapi.dev/v1/sujay-expense-tracker/up')
+        .then(res => res.json())
+        .then(data => {
+            countEl.innerText = `${data.count} Views`;
+        })
+        .catch(err => {
+            countEl.innerText = "1,024 Views"; // Fallback if API fails
+        });
+}
+
+// Call it immediately
+updateViewCount();
 
 // --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
@@ -127,3 +144,4 @@ app.delete('/api/expenses/:id', auth, withDB(async (req, res) => {
 
 // Export the app for Vercel Serverless
 module.exports = app;
+
