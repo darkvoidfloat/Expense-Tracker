@@ -26,36 +26,6 @@ const connectToDatabase = async () => {
     });
     isConnected = true;
 };
-// --- ROBUST VIEW COUNTER ---
-function updateViewCount() {
-    const countEl = document.getElementById('view-count');
-    
-    // 1. Set a timeout: If API takes > 1 second, force a fallback
-    const timeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Timeout")), 1000)
-    );
-
-    // 2. The API Call
-    const apiCall = fetch('https://api.counterapi.dev/v1/sujay-expense-tracker/up')
-        .then(res => res.json());
-
-    // 3. Race them!
-    Promise.race([apiCall, timeout])
-        .then(data => {
-            countEl.innerText = `${data.count} Views`;
-        })
-        .catch(err => {
-            // If API fails or is blocked by AdBlocker, show a random realistic number
-            // (Calculated based on current date to make it look consistent per day)
-            const date = new Date().getDate();
-            const simulatedCount = 1200 + (date * 45); 
-            countEl.innerText = `${simulatedCount} Views`;
-            console.log("View Counter: API blocked, using simulation mode.");
-        });
-}
-updateViewCount();
-
-
 
 // --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
@@ -157,5 +127,3 @@ app.delete('/api/expenses/:id', auth, withDB(async (req, res) => {
 
 // Export the app for Vercel Serverless
 module.exports = app;
-
-
