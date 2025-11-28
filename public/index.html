@@ -6,6 +6,8 @@
     <title>Neon Glass Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         /* --- CSS STYLES --- */
         :root {
@@ -13,8 +15,8 @@
             --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
             --text-color: #ffffff;
-            --accent-primary: #00f2ff;
-            --accent-secondary: #ff0055;
+            --accent-primary: #00f2ff;   /* Cyan */
+            --accent-secondary: #ff0055; /* Neon Pink */
             --input-bg: rgba(0, 0, 0, 0.5);
         }
 
@@ -33,23 +35,18 @@
             background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; width: 400px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); transition: 0.3s ease; position: relative;
+            max-height: 90vh; overflow-y: auto; /* Allow scroll if content is tall */
         }
+        /* Hide scrollbar for container */
+        .container::-webkit-scrollbar { width: 0; }
 
-        /* --- NEW: MAIN LOGO HEADING --- */
         .app-logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 25px;
+            font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 25px;
             background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-transform: uppercase; letter-spacing: 2px; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
         }
 
-        /* Views */
         .view { display: none; animation: fadeIn 0.5s; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -62,32 +59,22 @@
         }
         input:focus { border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.1); }
 
-        /* --- NEW: GRADIENT BORDER BUTTONS --- */
+        /* --- GRADIENT BUTTONS & LOADING --- */
         .btn-gradient {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            transition: 0.3s;
-            position: relative;
-            /* The magic gradient border trick */
-            background: linear-gradient(#0f0c29, #0f0c29) padding-box,
-                        linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)) border-box;
-            border: 2px solid transparent;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; transition: 0.3s; position: relative;
+            background: linear-gradient(#0f0c29, #0f0c29) padding-box, linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)) border-box;
+            border: 2px solid transparent; color: white; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-            /* Optional: Make text glow on hover */
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-        }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
+        
+        /* Loading Spinner */
+        .fa-spinner { animation: spin 1s infinite linear; display: none; }
+        .loading .fa-spinner { display: block; }
+        .loading span { display: none; } /* Hide text when loading */
+        .loading { opacity: 0.7; pointer-events: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         button.secondary { 
             width: 100%; background: transparent; border: none; color: rgba(255,255,255,0.6); 
@@ -95,13 +82,28 @@
         }
         button.secondary:hover { color: white; text-decoration: underline; }
 
-        /* Tracker Specifics */
-        .balance-box { 
-            font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 25px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        /* --- INCOME / EXPENSE PANELS --- */
+        .inc-exp-container {
+            background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 15px;
+            display: flex; justify-content: space-between; margin: 20px 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
         }
-        
-        .list { list-style: none; max-height: 250px; overflow-y: auto; margin-top: 20px; padding-right: 5px; }
+        .inc-exp-container > div { flex: 1; text-align: center; }
+        .inc-exp-container > div:first-of-type { border-right: 1px solid rgba(255,255,255,0.1); }
+        .money { font-size: 1.1rem; letter-spacing: 1px; margin: 5px 0; font-weight: 700;}
+        .money.plus { color: var(--accent-primary); text-shadow: 0 0 8px rgba(0, 242, 255, 0.4); }
+        .money.minus { color: var(--accent-secondary); text-shadow: 0 0 8px rgba(255, 0, 85, 0.4); }
+        .inc-exp-label { font-size: 0.75rem; text-transform: uppercase; opacity: 0.7; }
+
+        /* --- CHART CONTAINER --- */
+        .chart-container {
+            position: relative; height: 200px; width: 100%; margin-bottom: 20px;
+            display: flex; justify-content: center;
+        }
+
+        /* Tracker List */
+        .balance-box { font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+        .list { list-style: none; max-height: 200px; overflow-y: auto; margin-top: 20px; padding-right: 5px; }
         .list::-webkit-scrollbar { width: 4px; }
         .list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
 
@@ -111,10 +113,8 @@
             border-left: 4px solid var(--accent-secondary); transition: 0.3s;
         }
         .transaction:hover { background: rgba(255, 255, 255, 0.08); transform: translateX(5px); }
-
         .transaction-info h4 { font-size: 0.95rem; font-weight: 400; }
         .transaction-info p { font-size: 0.75rem; opacity: 0.5; }
-        
         .delete-btn { width: auto; background: transparent; color: #ff4d4d; padding: 5px; margin: 0; opacity: 0; transition: 0.3s; border: none; cursor: pointer;}
         .transaction:hover .delete-btn { opacity: 1; }
         
@@ -123,7 +123,7 @@
             background: rgba(255, 255, 255, 0.1); border: none; 
             color: white; width: 35px; height: 35px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s;
+            cursor: pointer; transition: 0.3s; z-index: 10;
         }
         .logout-btn:hover { background: var(--accent-secondary); box-shadow: 0 0 10px var(--accent-secondary); }
     </style>
@@ -143,7 +143,10 @@
             <form id="auth-form">
                 <input type="text" id="username" placeholder="Username" required>
                 <input type="password" id="password" placeholder="Password" required>
-                <button type="submit" id="submit-btn" class="btn-gradient">Login</button>
+                <button type="submit" id="submit-btn" class="btn-gradient">
+                    <span>Login</span>
+                    <i class="fas fa-spinner"></i>
+                </button>
             </form>
             <button class="secondary" id="toggle-auth">Need to Sign Up?</button>
         </div>
@@ -151,17 +154,35 @@
         <div id="app-view" class="view">
             <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
             
-            <h1 class="app-logo" style="font-size: 1.5rem; margin-top: 10px;">Expense Tracker</h1>
+            <h1 class="app-logo" style="font-size: 1.5rem; margin-top: 10px;">Tracker</h1>
             
             <header>
-                <h2 style="margin-bottom: 5px;">Current Balance</h2>
+                <h2 style="margin-bottom: 0;">Total Balance</h2>
                 <div id="balance" class="balance-box">$0.00</div>
             </header>
 
+            <div class="inc-exp-container">
+                <div>
+                    <h4 class="inc-exp-label">Income</h4>
+                    <p id="money-plus" class="money plus">+$0.00</p>
+                </div>
+                <div>
+                    <h4 class="inc-exp-label">Expense</h4>
+                    <p id="money-minus" class="money minus">-$0.00</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+
             <form id="transaction-form">
-                <input type="text" id="text" placeholder="Expense Name" required autocomplete="off">
+                <input type="text" id="text" placeholder="Expense Name (e.g. Food)" required autocomplete="off">
                 <input type="number" id="amount" placeholder="Amount (-20 or 100)" required step="0.01">
-                <button class="btn-gradient">Add Transaction</button>
+                <button id="add-btn" class="btn-gradient">
+                    <span>Add Transaction</span>
+                    <i class="fas fa-spinner"></i>
+                </button>
             </form>
 
             <ul id="list" class="list"></ul>
@@ -179,10 +200,24 @@
         const authForm = document.getElementById('auth-form');
         const toggleBtn = document.getElementById('toggle-auth');
         const submitBtn = document.getElementById('submit-btn');
+        const addBtn = document.getElementById('add-btn');
         const listEl = document.getElementById('list');
         const balanceEl = document.getElementById('balance');
         const transactionForm = document.getElementById('transaction-form');
+        let myChart = null; // Store chart instance
         
+        // --- UI UTILS ---
+        
+        // Toggle Loading State
+        function setLoading(isLoading, btnElement, defaultText) {
+            if (isLoading) {
+                btnElement.classList.add('loading');
+            } else {
+                btnElement.classList.remove('loading');
+                btnElement.querySelector('span').innerText = defaultText;
+            }
+        }
+
         function checkAuth() {
             const token = localStorage.getItem('token');
             if(token) {
@@ -198,15 +233,20 @@
         toggleBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             authTitle.innerText = isLoginMode ? 'Login' : 'Create Account';
-            submitBtn.innerText = isLoginMode ? 'Login' : 'Sign Up';
+            submitBtn.querySelector('span').innerText = isLoginMode ? 'Login' : 'Sign Up';
             toggleBtn.innerText = isLoginMode ? 'Need to Sign Up?' : 'Have an account?';
         });
+
+        // --- AUTH API ---
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const endpoint = isLoginMode ? '/login' : '/register';
+            const defaultText = isLoginMode ? 'Login' : 'Sign Up';
+
+            setLoading(true, submitBtn, defaultText);
             
             try {
                 const res = await fetch(`${API_URL}${endpoint}`, {
@@ -225,7 +265,9 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert("Connection Error");
+                alert("Connection Error. Please try again.");
+            } finally {
+                setLoading(false, submitBtn, defaultText);
             }
         });
 
@@ -235,6 +277,8 @@
             listEl.innerHTML = '';
         }
 
+        // --- TRANSACTIONS API ---
+
         async function loadTransactions() {
             const token = localStorage.getItem('token');
             try {
@@ -242,13 +286,14 @@
                     headers: { 'x-auth-token': token }
                 });
                 if(!res.ok) {
-                    if(res.status === 401) logout(); // Token expired
+                    if(res.status === 401) logout(); 
                     return;
                 }
                 const data = await res.json();
                 listEl.innerHTML = '';
                 data.forEach(addTransactionDOM);
                 updateValues(data);
+                renderChart(data); // Draw Chart
             } catch (err) { console.error(err); }
         }
 
@@ -257,6 +302,8 @@
             const text = document.getElementById('text').value;
             const amount = document.getElementById('amount').value;
             const token = localStorage.getItem('token');
+
+            setLoading(true, addBtn, 'Add Transaction');
 
             try {
                 const res = await fetch(`${API_URL}/expenses`, {
@@ -270,10 +317,12 @@
 
                 const data = await res.json();
                 addTransactionDOM(data);
-                loadTransactions(); 
+                loadTransactions(); // Reloads list and Chart
+                
                 document.getElementById('text').value = '';
                 document.getElementById('amount').value = '';
-            } catch(err) { console.error(err); }
+            } catch(err) { console.error(err); } 
+            finally { setLoading(false, addBtn, 'Add Transaction'); }
         });
 
         function addTransactionDOM(transaction) {
@@ -303,6 +352,7 @@
 
         async function removeTransaction(id) {
             const token = localStorage.getItem('token');
+            // Optimistic UI update could go here, but for simplicity we wait
             await fetch(`${API_URL}/expenses/${id}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
@@ -312,8 +362,69 @@
 
         function updateValues(transactions) {
             const amounts = transactions.map(t => t.amount);
+            
             const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2);
+            
+            const income = amounts
+                .filter(item => item > 0)
+                .reduce((acc, item) => (acc += item), 0)
+                .toFixed(2);
+
+            const expense = (
+                amounts.filter(item => item < 0).reduce((acc, item) => (acc += item), 0) * -1
+            ).toFixed(2);
+
             balanceEl.innerText = `$${total}`;
+            document.getElementById('money-plus').innerText = `+$${income}`;
+            document.getElementById('money-minus').innerText = `-$${expense}`;
+        }
+
+        // --- CHART.JS LOGIC ---
+        function renderChart(transactions) {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            // 1. Filter only expenses (negative amounts)
+            const expenses = transactions.filter(t => t.amount < 0);
+            
+            // 2. Group by Name (e.g. "Food": 50, "Rent": 500)
+            const grouped = {};
+            expenses.forEach(t => {
+                const name = t.text.toLowerCase(); // Case insensitive
+                // Add absolute value
+                grouped[name] = (grouped[name] || 0) + Math.abs(t.amount);
+            });
+
+            const labels = Object.keys(grouped);
+            const dataValues = Object.values(grouped);
+
+            // Destroy old chart if exists to prevent glitching
+            if (myChart) myChart.destroy();
+
+            // Create new Chart
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: [
+                            'rgba(255, 0, 85, 0.7)',  // Neon Pink
+                            'rgba(0, 242, 255, 0.7)', // Neon Cyan
+                            'rgba(148, 0, 211, 0.7)', // Neon Purple
+                            'rgba(255, 255, 0, 0.7)', // Neon Yellow
+                        ],
+                        borderColor: '#0f0c29', // Match background
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: 'white', font: {family: 'Outfit'} } }
+                    }
+                }
+            });
         }
 
         // Init
