@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neon Glass Tracker</title>
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -25,7 +27,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
         
         body { 
-            /* Rotating Background Gradient */
             background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a0b2e);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -36,6 +37,8 @@
             overflow-x: hidden; 
             position: relative; 
             color: white; 
+            /* REQUIRED FOR 3D TILT EFFECT */
+            perspective: 1000px; 
         }
 
         @keyframes gradientBG {
@@ -44,6 +47,18 @@
             100% { background-position: 0% 50%; }
         }
         
+        /* --- MOUSE SPOTLIGHT --- */
+        #spotlight {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(600px circle at var(--x) var(--y), rgba(29, 78, 216, 0.15), transparent 80%);
+            opacity: 0; /* Hidden initially until mouse moves */
+            transition: opacity 0.5s;
+        }
+
         /* --- ANIMATED BLOBS (Rotating) --- */
         .blob { position: absolute; filter: blur(80px); z-index: -1; opacity: 0.6; animation: floatRotate 20s infinite linear; }
         .blob-1 { top: 10%; left: 10%; width: 300px; height: 300px; background: var(--accent-secondary); animation-duration: 25s; }
@@ -66,10 +81,12 @@
             padding: 40px; 
             width: 400px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
-            transition: 0.3s ease; 
+            transition: transform 0.1s ease-out; /* Smooth movement */
             position: relative;
             max-height: 90vh; 
             overflow-y: auto; 
+            z-index: 10;
+            transform-style: preserve-3d; /* Key for 3D effect */
         }
         .container::-webkit-scrollbar { width: 0; }
 
@@ -183,12 +200,17 @@
 </head>
 <body>
 
+    <!-- Mouse Spotlight -->
+    <div id="spotlight"></div>
+
+    <!-- Rotating Background Elements -->
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
 
-    <div class="container">
+    <div class="container" id="glass-card">
         
+        <!-- AUTH SCREEN -->
         <div id="auth-view" class="view active">
             <h1 class="app-logo">Expense Tracker</h1>
             <h2 id="auth-title">Login</h2>
@@ -196,6 +218,7 @@
             <form id="auth-form">
                 <input type="text" id="username" placeholder="Username" required>
                 <input type="password" id="password" placeholder="Password" required>
+                <!-- Animated Button -->
                 <button type="submit" id="submit-btn" class="btn-gradient">
                     <span>Login</span>
                     <i class="fas fa-spinner"></i>
@@ -203,11 +226,13 @@
             </form>
             <button class="secondary" id="toggle-auth">Need to Sign Up?</button>
 
+            <!-- FOOTER WITH NAME -->
             <div class="auth-footer">
                 <p class="developer-credit">Developed by <span class="developer-name">Sujay</span></p>
             </div>
         </div>
 
+        <!-- APP DASHBOARD SCREEN -->
         <div id="app-view" class="view">
             <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
             
@@ -236,6 +261,7 @@
             <form id="transaction-form">
                 <input type="text" id="text" placeholder="Expense Name (e.g. Food)" required autocomplete="off">
                 <input type="number" id="amount" placeholder="Amount (-20 or 100)" required step="0.01">
+                <!-- Animated Button -->
                 <button id="add-btn" class="btn-gradient">
                     <span>Add Transaction</span>
                     <i class="fas fa-spinner"></i>
@@ -249,6 +275,25 @@
 
     <script>
         const API_URL = '/api'; // Backend URL for Vercel
+
+        // --- MOUSE MOVEMENT EFFECTS ---
+        const card = document.getElementById('glass-card');
+        const spotlight = document.getElementById('spotlight');
+
+        document.addEventListener('mousemove', (e) => {
+            // 1. Spotlight Effect
+            // Updates the X and Y variables in CSS for the radial gradient position
+            spotlight.style.setProperty('--x', `${e.clientX}px`);
+            spotlight.style.setProperty('--y', `${e.clientY}px`);
+            spotlight.style.opacity = '1'; // Show spotlight once moved
+
+            // 2. 3D Tilt Effect
+            const x = (window.innerWidth / 2 - e.pageX) / 25; // Divide by 25 to control sensitivity
+            const y = (window.innerHeight / 2 - e.pageY) / 25;
+
+            // Apply rotation. Note: 'y' controls rotateX because looking up/down rotates around X axis
+            card.style.transform = `rotateX(${y}deg) rotateY(${x * -1}deg)`; 
+        });
 
         // --- STATE VARIABLES ---
         let isLoginMode = true;
@@ -279,6 +324,9 @@
             if(token) {
                 authView.classList.remove('active');
                 appView.classList.add('active');
+                // Reset transform so the dashboard is flat and readable
+                card.style.transform = 'none';
+                // Optional: Disable tilt on dashboard if preferred, but keeping it for cool factor
                 loadTransactions();
             } else {
                 authView.classList.add('active');
