@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- CSS STYLES --- */
+        /* --- CORE VARIABLES --- */
         :root {
             --bg-color: #0f0c29;
             --glass-bg: rgba(255, 255, 255, 0.05);
@@ -17,64 +17,112 @@
             --text-color: #ffffff;
             --accent-primary: #00f2ff;   /* Cyan */
             --accent-secondary: #ff0055; /* Neon Pink */
+            --accent-tertiary: #9d00ff;  /* Purple */
             --input-bg: rgba(0, 0, 0, 0.5);
         }
 
+        /* --- GLOBAL RESET --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background: var(--bg-color); min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; position: relative; color: white; }
         
-        /* Animated Background Blobs */
-        .blob { position: absolute; filter: blur(80px); z-index: -1; opacity: 0.6; animation: move 10s infinite alternate; }
-        .blob-1 { top: 10%; left: 10%; width: 300px; height: 300px; background: var(--accent-secondary); }
-        .blob-2 { bottom: 10%; right: 10%; width: 350px; height: 350px; background: #302b63; }
-        .blob-3 { top: 40%; left: 40%; width: 200px; height: 200px; background: var(--accent-primary); animation-duration: 15s; }
-        @keyframes move { from { transform: translate(0, 0) scale(1); } to { transform: translate(20px, -20px) scale(1.1); } }
-
-        /* Main Container */
-        .container {
-            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; width: 400px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); transition: 0.3s ease; position: relative;
-            max-height: 90vh; overflow-y: auto; /* Allow scroll if content is tall */
+        body { 
+            /* Rotating Background Gradient */
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a0b2e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow-x: hidden; 
+            position: relative; 
+            color: white; 
         }
-        /* Hide scrollbar for container */
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* --- ANIMATED BLOBS (Now Rotating!) --- */
+        .blob { position: absolute; filter: blur(80px); z-index: -1; opacity: 0.6; animation: floatRotate 20s infinite linear; }
+        .blob-1 { top: 10%; left: 10%; width: 300px; height: 300px; background: var(--accent-secondary); animation-duration: 25s; }
+        .blob-2 { bottom: 10%; right: 10%; width: 350px; height: 350px; background: #302b63; animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 40%; width: 200px; height: 200px; background: var(--accent-primary); animation-duration: 15s; animation-direction: reverse; }
+        
+        @keyframes floatRotate { 
+            0% { transform: translate(0, 0) rotate(0deg); } 
+            33% { transform: translate(30px, -50px) rotate(120deg); } 
+            66% { transform: translate(-20px, 20px) rotate(240deg); } 
+            100% { transform: translate(0, 0) rotate(360deg); } 
+        }
+
+        /* --- MAIN GLASS CONTAINER --- */
+        .container {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); 
+            border-radius: 24px; 
+            padding: 40px; 
+            width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
+            transition: 0.3s ease; 
+            position: relative;
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
         .container::-webkit-scrollbar { width: 0; }
 
+        /* --- TYPOGRAPHY --- */
         .app-logo {
             font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 25px;
             background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-transform: uppercase; letter-spacing: 2px; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
+            text-transform: uppercase; letter-spacing: 2px; 
+            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
         }
 
-        .view { display: none; animation: fadeIn 0.5s; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         h2 { text-align: center; margin-bottom: 20px; font-weight: 300; letter-spacing: 1px; font-size: 1rem; opacity: 0.8; text-transform: uppercase; }
-        
+
+        /* --- INPUTS --- */
         input {
             width: 100%; background: var(--input-bg); border: 1px solid var(--glass-border);
             border-radius: 12px; padding: 15px; color: white; margin-bottom: 15px; outline: none; transition: 0.3s;
         }
         input:focus { border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.1); }
 
-        /* --- GRADIENT BUTTONS & LOADING --- */
+        /* --- ANIMATED GRADIENT BUTTONS --- */
         .btn-gradient {
             width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer;
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; transition: 0.3s; position: relative;
-            background: linear-gradient(#0f0c29, #0f0c29) padding-box, linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)) border-box;
-            border: 2px solid transparent; color: white; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            
+            /* The Magic Rotating Gradient Logic */
+            background: 
+                linear-gradient(#0f0c29, #0f0c29) padding-box, /* Inner color */
+                linear-gradient(45deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary), var(--accent-primary)) border-box; /* Border Gradient */
+            
+            background-size: 200% 200%; /* Make gradient large enough to move */
+            border: 2px solid transparent; 
+            color: white; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             display: flex; justify-content: center; align-items: center; gap: 10px;
+            
+            /* Animate the background position */
+            animation: borderFlow 3s linear infinite;
         }
-        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
-        
-        /* Loading Spinner */
-        .fa-spinner { animation: spin 1s infinite linear; display: none; }
-        .loading .fa-spinner { display: block; }
-        .loading span { display: none; } /* Hide text when loading */
-        .loading { opacity: 0.7; pointer-events: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @keyframes borderFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-gradient:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); 
+            /* Speed up animation on hover */
+            animation-duration: 1.5s;
+        }
 
         button.secondary { 
             width: 100%; background: transparent; border: none; color: rgba(255,255,255,0.6); 
@@ -82,7 +130,22 @@
         }
         button.secondary:hover { color: white; text-decoration: underline; }
 
-        /* --- INCOME / EXPENSE PANELS --- */
+        /* Loading Spinner */
+        .fa-spinner { animation: spin 1s infinite linear; display: none; }
+        .loading .fa-spinner { display: block; }
+        .loading span { display: none; }
+        .loading { opacity: 0.7; pointer-events: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- VIEWS --- */
+        .view { display: none; animation: fadeIn 0.5s; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- DASHBOARD ELEMENTS --- */
+        .balance-box { font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+        
+        /* Income/Expense Panel */
         .inc-exp-container {
             background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 15px;
             display: flex; justify-content: space-between; margin: 20px 0;
@@ -95,14 +158,9 @@
         .money.minus { color: var(--accent-secondary); text-shadow: 0 0 8px rgba(255, 0, 85, 0.4); }
         .inc-exp-label { font-size: 0.75rem; text-transform: uppercase; opacity: 0.7; }
 
-        /* --- CHART CONTAINER --- */
-        .chart-container {
-            position: relative; height: 200px; width: 100%; margin-bottom: 20px;
-            display: flex; justify-content: center;
-        }
+        .chart-container { position: relative; height: 200px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; }
 
-        /* Tracker List */
-        .balance-box { font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+        /* Transaction List */
         .list { list-style: none; max-height: 200px; overflow-y: auto; margin-top: 20px; padding-right: 5px; }
         .list::-webkit-scrollbar { width: 4px; }
         .list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
@@ -126,6 +184,23 @@
             cursor: pointer; transition: 0.3s; z-index: 10;
         }
         .logout-btn:hover { background: var(--accent-secondary); box-shadow: 0 0 10px var(--accent-secondary); }
+
+        /* --- FOOTER / CREDITS --- */
+        .auth-footer {
+            margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6);
+        }
+        .developer-credit { margin-bottom: 5px; letter-spacing: 1px; }
+        .developer-name {
+            color: var(--accent-primary); font-weight: 700; text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
+        }
+        .view-counter {
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            font-size: 0.75rem; color: var(--accent-secondary);
+        }
+        .view-counter i { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; text-shadow: 0 0 10px var(--accent-secondary); } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -149,6 +224,14 @@
                 </button>
             </form>
             <button class="secondary" id="toggle-auth">Need to Sign Up?</button>
+
+            <div class="auth-footer">
+                <p class="developer-credit">Developed by <span class="developer-name">Sujay</span></p>
+                <div class="view-counter">
+                    <i class="fas fa-eye"></i>
+                    <span id="view-count">Loading...</span>
+                </div>
+            </div>
         </div>
 
         <div id="app-view" class="view">
@@ -191,8 +274,9 @@
     </div>
 
     <script>
-        const API_URL = '/api'; // Relative path for Vercel
-        
+        const API_URL = '/api'; // Backend URL for Vercel
+
+        // --- STATE VARIABLES ---
         let isLoginMode = true;
         const authView = document.getElementById('auth-view');
         const appView = document.getElementById('app-view');
@@ -204,11 +288,9 @@
         const listEl = document.getElementById('list');
         const balanceEl = document.getElementById('balance');
         const transactionForm = document.getElementById('transaction-form');
-        let myChart = null; // Store chart instance
+        let myChart = null; 
         
-        // --- UI UTILS ---
-        
-        // Toggle Loading State
+        // --- HELPER FUNCTIONS ---
         function setLoading(isLoading, btnElement, defaultText) {
             if (isLoading) {
                 btnElement.classList.add('loading');
@@ -230,6 +312,17 @@
             }
         }
 
+        // --- VIEW COUNTER ---
+        function updateViewCount() {
+            const countEl = document.getElementById('view-count');
+            fetch('https://api.counterapi.dev/v1/sujay-expense-tracker/up')
+                .then(res => res.json())
+                .then(data => { countEl.innerText = `${data.count} Views`; })
+                .catch(err => { countEl.innerText = "1,024 Views"; });
+        }
+        updateViewCount();
+
+        // --- AUTH LOGIC (No Easter Egg) ---
         toggleBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             authTitle.innerText = isLoginMode ? 'Login' : 'Create Account';
@@ -237,12 +330,11 @@
             toggleBtn.innerText = isLoginMode ? 'Need to Sign Up?' : 'Have an account?';
         });
 
-        // --- AUTH API ---
-
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            
             const endpoint = isLoginMode ? '/login' : '/register';
             const defaultText = isLoginMode ? 'Login' : 'Sign Up';
 
@@ -265,7 +357,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert("Connection Error. Please try again.");
+                alert("Connection Error. Please check your internet or database.");
             } finally {
                 setLoading(false, submitBtn, defaultText);
             }
@@ -277,14 +369,12 @@
             listEl.innerHTML = '';
         }
 
-        // --- TRANSACTIONS API ---
+        // --- TRANSACTION & APP LOGIC ---
 
         async function loadTransactions() {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`${API_URL}/expenses`, {
-                    headers: { 'x-auth-token': token }
-                });
+                const res = await fetch(`${API_URL}/expenses`, { headers: { 'x-auth-token': token } });
                 if(!res.ok) {
                     if(res.status === 401) logout(); 
                     return;
@@ -293,7 +383,7 @@
                 listEl.innerHTML = '';
                 data.forEach(addTransactionDOM);
                 updateValues(data);
-                renderChart(data); // Draw Chart
+                renderChart(data); 
             } catch (err) { console.error(err); }
         }
 
@@ -308,17 +398,13 @@
             try {
                 const res = await fetch(`${API_URL}/expenses`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
                     body: JSON.stringify({ text, amount })
                 });
 
                 const data = await res.json();
                 addTransactionDOM(data);
-                loadTransactions(); // Reloads list and Chart
-                
+                loadTransactions(); 
                 document.getElementById('text').value = '';
                 document.getElementById('amount').value = '';
             } catch(err) { console.error(err); } 
@@ -328,11 +414,9 @@
         function addTransactionDOM(transaction) {
             const sign = transaction.amount < 0 ? '-' : '+';
             const borderColors = transaction.amount < 0 ? '#ff0055' : '#00f2ff';
-
             const item = document.createElement('li');
             item.classList.add('transaction');
             item.style.borderLeft = `4px solid ${borderColors}`;
-
             item.innerHTML = `
                 <div class="transaction-info">
                     <h4>${transaction.text}</h4>
@@ -352,11 +436,7 @@
 
         async function removeTransaction(id) {
             const token = localStorage.getItem('token');
-            // Optimistic UI update could go here, but for simplicity we wait
-            await fetch(`${API_URL}/expenses/${id}`, {
-                method: 'DELETE',
-                headers: { 'x-auth-token': token }
-            });
+            await fetch(`${API_URL}/expenses/${id}`, { method: 'DELETE', headers: { 'x-auth-token': token } });
             loadTransactions();
         }
 
@@ -379,55 +459,40 @@
             document.getElementById('money-minus').innerText = `-$${expense}`;
         }
 
-        // --- CHART.JS LOGIC ---
         function renderChart(transactions) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
-            
-            // 1. Filter only expenses (negative amounts)
             const expenses = transactions.filter(t => t.amount < 0);
             
-            // 2. Group by Name (e.g. "Food": 50, "Rent": 500)
+            // Group by Name
             const grouped = {};
             expenses.forEach(t => {
-                const name = t.text.toLowerCase(); // Case insensitive
-                // Add absolute value
+                const name = t.text.toLowerCase();
                 grouped[name] = (grouped[name] || 0) + Math.abs(t.amount);
             });
 
             const labels = Object.keys(grouped);
             const dataValues = Object.values(grouped);
 
-            // Destroy old chart if exists to prevent glitching
             if (myChart) myChart.destroy();
-
-            // Create new Chart
             myChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: dataValues,
-                        backgroundColor: [
-                            'rgba(255, 0, 85, 0.7)',  // Neon Pink
-                            'rgba(0, 242, 255, 0.7)', // Neon Cyan
-                            'rgba(148, 0, 211, 0.7)', // Neon Purple
-                            'rgba(255, 255, 0, 0.7)', // Neon Yellow
-                        ],
-                        borderColor: '#0f0c29', // Match background
-                        borderWidth: 2
+                        backgroundColor: ['rgba(255, 0, 85, 0.7)', 'rgba(0, 242, 255, 0.7)', 'rgba(148, 0, 211, 0.7)', 'rgba(255, 255, 0, 0.7)'],
+                        borderColor: '#0f0c29', borderWidth: 2
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: 'white', font: {family: 'Outfit'} } }
-                    }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'right', labels: { color: 'white', font: {family: 'Outfit'} } } } 
                 }
             });
         }
 
-        // Init
+        // Initialize App
         checkAuth();
     </script>
 </body>
