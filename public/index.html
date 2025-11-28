@@ -44,7 +44,7 @@
             100% { background-position: 0% 50%; }
         }
         
-        /* --- ANIMATED BLOBS (Now Rotating!) --- */
+        /* --- ANIMATED BLOBS (Rotating) --- */
         .blob { position: absolute; filter: blur(80px); z-index: -1; opacity: 0.6; animation: floatRotate 20s infinite linear; }
         .blob-1 { top: 10%; left: 10%; width: 300px; height: 300px; background: var(--accent-secondary); animation-duration: 25s; }
         .blob-2 { bottom: 10%; right: 10%; width: 350px; height: 350px; background: #302b63; animation-delay: -5s; }
@@ -95,34 +95,19 @@
         .btn-gradient {
             width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer;
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; transition: 0.3s; position: relative;
-            
-            /* The Magic Rotating Gradient Logic */
             background: 
-                linear-gradient(#0f0c29, #0f0c29) padding-box, /* Inner color */
-                linear-gradient(45deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary), var(--accent-primary)) border-box; /* Border Gradient */
-            
-            background-size: 200% 200%; /* Make gradient large enough to move */
+                linear-gradient(#0f0c29, #0f0c29) padding-box, 
+                linear-gradient(45deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary), var(--accent-primary)) border-box;
+            background-size: 200% 200%;
             border: 2px solid transparent; 
             color: white; 
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             display: flex; justify-content: center; align-items: center; gap: 10px;
-            
-            /* Animate the background position */
             animation: borderFlow 3s linear infinite;
         }
+        @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        @keyframes borderFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .btn-gradient:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); 
-            /* Speed up animation on hover */
-            animation-duration: 1.5s;
-        }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); animation-duration: 1.5s; }
 
         button.secondary { 
             width: 100%; background: transparent; border: none; color: rgba(255,255,255,0.6); 
@@ -145,7 +130,6 @@
         /* --- DASHBOARD ELEMENTS --- */
         .balance-box { font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
         
-        /* Income/Expense Panel */
         .inc-exp-container {
             background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 15px;
             display: flex; justify-content: space-between; margin: 20px 0;
@@ -195,12 +179,6 @@
             color: var(--accent-primary); font-weight: 700; text-transform: uppercase;
             text-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
         }
-        .view-counter {
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            font-size: 0.75rem; color: var(--accent-secondary);
-        }
-        .view-counter i { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; text-shadow: 0 0 10px var(--accent-secondary); } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -227,10 +205,6 @@
 
             <div class="auth-footer">
                 <p class="developer-credit">Developed by <span class="developer-name">Sujay</span></p>
-                <div class="view-counter">
-                    <i class="fas fa-eye"></i>
-                    <span id="view-count">Loading...</span>
-                </div>
             </div>
         </div>
 
@@ -312,17 +286,7 @@
             }
         }
 
-        // --- VIEW COUNTER ---
-        function updateViewCount() {
-            const countEl = document.getElementById('view-count');
-            fetch('https://api.counterapi.dev/v1/sujay-expense-tracker/up')
-                .then(res => res.json())
-                .then(data => { countEl.innerText = `${data.count} Views`; })
-                .catch(err => { countEl.innerText = "1,024 Views"; });
-        }
-        updateViewCount();
-
-        // --- AUTH LOGIC (No Easter Egg) ---
+        // --- AUTH LOGIC ---
         toggleBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             authTitle.innerText = isLoginMode ? 'Login' : 'Create Account';
